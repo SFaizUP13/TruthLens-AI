@@ -36,8 +36,8 @@ class GroqLLM(BaseLLM):
         )
 
   return response.output_text
-
 class GroqResearchLLM(BaseLLM):
+
     def __init__(self):
         super().__init__(model="openai/gpt-oss-20b")
 
@@ -56,18 +56,23 @@ class GroqResearchLLM(BaseLLM):
         response_model=None,
         **kwargs
     ):
-        response = self.client.responses.create(
+
+        response = self.client.chat.completions.create(
             model="openai/gpt-oss-20b",
-            input=messages,
-            tool_choice="required",
+            messages=messages,
             tools=[
                 {
                     "type": "browser_search"
                 }
-            ]
+            ],
+            tool_choice="required"
         )
 
-      
-        return response.output_text
+        result = response.choices[0].message.content
 
+        if not result:
+            raise ValueError(
+                "Groq Research Agent returned an empty response."
+            )
 
+        return result
