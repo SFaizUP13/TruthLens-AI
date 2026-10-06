@@ -34,6 +34,9 @@ class GroqLLM(BaseLLM):
 
             input=messages
         )
+
+  return response.output_text
+
 class GroqResearchLLM(BaseLLM):
     def __init__(self):
         super().__init__(model="openai/gpt-oss-20b")
@@ -64,8 +67,7 @@ class GroqResearchLLM(BaseLLM):
             ]
         )
 
-        return response.output_text
-
+      
         return response.output_text
 
 
