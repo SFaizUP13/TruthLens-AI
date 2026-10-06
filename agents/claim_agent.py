@@ -7,14 +7,15 @@ def create_claim_agent():
     # Get Groq API key from Streamlit secrets
     groq_api_key = st.secrets["GROQ_API_KEY"]
 
-    # Configure Groq through its OpenAI-compatible endpoint
+    # Connect CrewAI to Groq's OpenAI-compatible API
     llm = LLM(
         model="openai/gpt-oss-20b",
-        api_key=groq_api_key,
-        base_url="https://api.groq.com/openai/v1"
+        custom_openai=True,
+        base_url="https://api.groq.com/openai/v1",
+        api_key=groq_api_key
     )
 
-    # Create Claim Analyst agent
+    # Create the Claim Analyst agent
     claim_agent = Agent(
 
         role="Claim Analyst",
