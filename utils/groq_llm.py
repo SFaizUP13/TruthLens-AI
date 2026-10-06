@@ -30,7 +30,6 @@ class GroqLLM(BaseLLM):
 
         return response.output_text
 
-
 class GroqResearchLLM(BaseLLM):
 
     def __init__(self):
@@ -51,9 +50,22 @@ class GroqResearchLLM(BaseLLM):
         response_model=None,
         **kwargs
     ):
+
+        # Clean CrewAI messages before sending them to Groq
+        clean_messages = []
+
+        for message in messages:
+
+            clean_message = {
+                "role": message.get("role"),
+                "content": message.get("content", "")
+            }
+
+            clean_messages.append(clean_message)
+
         response = self.client.chat.completions.create(
             model="openai/gpt-oss-20b",
-            messages=messages,
+            messages=clean_messages,
             tools=[
                 {
                     "type": "browser_search"
