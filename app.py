@@ -1,6 +1,6 @@
 import streamlit as st
 
-from utils.groq_client import get_groq_client
+from crew.verification_crew import run_claim_analysis
 
 
 # --------------------------------------------------
@@ -27,49 +27,56 @@ st.write(
 
 
 # --------------------------------------------------
-# Test input
+# Claim input
 # --------------------------------------------------
 
-st.subheader("🧪 Groq Connection Test")
+st.subheader("📰 Claim Analysis")
 
-user_question = st.text_area(
-    "Enter a question:",
-    placeholder="What is artificial intelligence?"
+claim = st.text_area(
+
+    "Enter a news claim:",
+
+    placeholder=(
+        "Example: Scientists have discovered "
+        "a new planet that can support human life."
+    ),
+
+    height=150
 )
 
 
 # --------------------------------------------------
-# Ask Groq
+# Analyze claim
 # --------------------------------------------------
 
-if st.button("Ask Groq"):
+if st.button("Analyze Claim"):
 
-    if not user_question.strip():
+    if not claim.strip():
 
-        st.warning("Please enter a question.")
+        st.warning(
+            "Please enter a claim first."
+        )
 
-    else:
+        st.stop()
 
-        try:
+    try:
 
-            # Create Groq client
-            client = get_groq_client()
+        with st.spinner(
+            "🤖 Claim Analyst is analyzing..."
+        ):
 
-            # Send request to Groq
-            response = client.responses.create(
-
-                model="openai/gpt-oss-20b",
-
-                input=user_question
+            result = run_claim_analysis(
+                claim
             )
 
-            # Display response
-            st.subheader("🤖 Groq Response")
+        st.subheader(
+            "🔎 Claim Analysis"
+        )
 
-            st.write(response.output_text)
+        st.write(result)
 
-        except Exception as e:
+    except Exception as e:
 
-            st.error(
-                f"Something went wrong: {str(e)}"
-            )
+        st.error(
+            f"Something went wrong: {str(e)}"
+        )
