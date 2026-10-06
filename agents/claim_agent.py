@@ -9,7 +9,7 @@ def create_claim_agent():
 
     # Connect CrewAI to Groq's OpenAI-compatible API
     llm = LLM(
-        model="openai/gpt-oss-20b",
+        model="openai/gpt-oss-120b",
         custom_openai=True,
         base_url="https://api.groq.com/openai/v1",
         api_key=groq_api_key
