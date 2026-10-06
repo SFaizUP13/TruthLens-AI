@@ -8,12 +8,12 @@ def create_claim_agent():
     groq_api_key = st.secrets["GROQ_API_KEY"]
 
     # Connect CrewAI to Groq's OpenAI-compatible API
-    llm = LLM(
-        model="openai/gpt-oss-120b",
-        custom_openai=True,
-        base_url="https://api.groq.com/openai/v1",
-        api_key=groq_api_key
-    )
+    #llm = LLM(
+    #    model="openai/gpt-oss-120b",
+    #    custom_openai=True,
+    #    base_url="https://api.groq.com/openai/v1",
+    #    api_key=groq_api_key
+    #)
 
     # Create the Claim Analyst agent
     claim_agent = Agent(
