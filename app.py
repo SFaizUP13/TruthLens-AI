@@ -1,57 +1,75 @@
 import streamlit as st
+
 from utils.groq_client import get_groq_client
 
 
+# --------------------------------------------------
+# Page configuration
+# --------------------------------------------------
+
 st.set_page_config(
     page_title="TruthLens AI",
-    page_icon="🔎"
+    page_icon="🔎",
+    layout="centered"
 )
+
+
+# --------------------------------------------------
+# Application title
+# --------------------------------------------------
 
 st.title("🔎 TruthLens AI")
 
 st.write(
-    "AI-powered misinformation and media verification system"
-)
-
-claim = st.text_area(
-    "Enter a news claim",
-    placeholder="Example: Scientists have discovered a new planet..."
+    "Multi-Agentic AI system for detecting "
+    "misinformation and manipulated media."
 )
 
 
-if st.button("Verify"):
+# --------------------------------------------------
+# Test input
+# --------------------------------------------------
 
-    if not claim:
-        st.warning("Please enter a claim.")
-        st.stop()
+st.subheader("🧪 Groq Connection Test")
 
-    try:
+user_question = st.text_area(
+    "Enter a question:",
+    placeholder="What is artificial intelligence?"
+)
 
-        client = get_groq_client()
 
-        response = client.responses.create(
-            model="openai/gpt-oss-20b",
-            input=f"""
-You are a fact-checking assistant.
+# --------------------------------------------------
+# Ask Groq
+# --------------------------------------------------
 
-Analyze the following claim:
+if st.button("Ask Groq"):
 
-{claim}
+    if not user_question.strip():
 
-Explain:
-1. What the claim says
-2. What would need to be verified
-3. Whether the claim appears suspicious
-4. What evidence should be searched for
+        st.warning("Please enter a question.")
 
-Do not invent evidence.
-"""
-        )
+    else:
 
-        st.subheader("Initial Analysis")
+        try:
 
-        st.write(response.output_text)
+            # Create Groq client
+            client = get_groq_client()
 
-    except Exception as e:
+            # Send request to Groq
+            response = client.responses.create(
 
-        st.error(f"Error: {e}")
+                model="openai/gpt-oss-20b",
+
+                input=user_question
+            )
+
+            # Display response
+            st.subheader("🤖 Groq Response")
+
+            st.write(response.output_text)
+
+        except Exception as e:
+
+            st.error(
+                f"Something went wrong: {str(e)}"
+            )
