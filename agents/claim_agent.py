@@ -1,21 +1,12 @@
-import streamlit as st
-from crewai import Agent, LLM
+from crewai import Agent
+
+from utils.groq_llm import GroqLLM
 
 
 def create_claim_agent():
 
-    # Get Groq API key from Streamlit secrets
-    groq_api_key = st.secrets["GROQ_API_KEY"]
+    llm = GroqLLM()
 
-    # Connect CrewAI to Groq's OpenAI-compatible API
-    #llm = LLM(
-    #    model="openai/gpt-oss-120b",
-    #    custom_openai=True,
-    #    base_url="https://api.groq.com/openai/v1",
-    #    api_key=groq_api_key
-    #)
-
-    # Create the Claim Analyst agent
     claim_agent = Agent(
 
         role="Claim Analyst",
@@ -30,7 +21,7 @@ def create_claim_agent():
 
         You examine claims objectively.
 
-        You do not assume that a claim is true or false.
+        You never assume that a claim is true or false.
 
         You identify factual assertions, important
         entities, dates, locations and information
