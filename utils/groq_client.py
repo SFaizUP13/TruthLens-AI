@@ -1,13 +1,10 @@
-import os
+import streamlit as st
 from openai import OpenAI
 
 
 def get_groq_client():
 
-    api_key = os.getenv("GROQ_API_KEY")
-
-    if not api_key:
-        raise ValueError("GROQ_API_KEY is not configured.")
+    api_key = st.secrets["GROQ_API_KEY"]
 
     client = OpenAI(
         api_key=api_key,
