@@ -23,10 +23,48 @@ def create_research_task(agent, claim_task):
 
         relative to the current verification date.
 
-        If the claim contains a time-sensitive expression such as
-        "today", "yesterday", "currently", or "recently", prioritize
-        the most recent available evidence and explicitly check whether
-        the claimed event occurred on or around the relevant date.
+        ============================================================
+        SPECIAL RULE FOR TIME-SENSITIVE CLAIMS
+        ============================================================
+
+        If the claim refers to something happening "today",
+        "yesterday", "currently", "recently", or another recent
+        time period:
+
+        1. Search specifically for information from the
+           verification date first.
+
+        2. Search recent news from the verification date and
+           the preceding few days.
+
+        3. Search official government, institutional, or
+           organizational sources for the same period.
+
+        4. Check multiple reputable news organizations.
+
+        5. Pay close attention to the publication date of
+           every source.
+
+        6. Do NOT use an old article as evidence that an event
+           did or did not happen on the current verification date.
+
+        7. Older sources may be used only as historical
+           background or context.
+
+        8. Clearly distinguish between:
+           - Current evidence
+           - Recent evidence
+           - Historical/background information
+
+        9. If current evidence cannot be found, explicitly say:
+           "No current evidence was found."
+
+        10. Do not conclude that an event did not happen merely
+            because older sources do not mention it.
+
+        ============================================================
+        GENERAL RESEARCH
+        ============================================================
 
         Conduct web research to find reliable evidence
         relevant to the claim.
@@ -40,8 +78,7 @@ def create_research_task(agent, claim_task):
 
         3. When the information was reported.
 
-        4. What scientific or factual evidence supports
-           the claim.
+        4. What factual evidence supports the claim.
 
         5. Whether credible sources disagree with the claim.
 
@@ -54,15 +91,16 @@ def create_research_task(agent, claim_task):
         - Official government organizations
         - Universities
         - Scientific publications
+        - Official organizations
         - Reputable news organizations
-
-        For time-sensitive claims, prioritize recent sources
-        over older historical sources.
 
         Compare information from multiple sources whenever
         possible.
 
         Clearly distinguish between:
+        - Current evidence
+        - Recent evidence
+        - Historical/background information
         - Evidence supporting the claim
         - Evidence contradicting the claim
         - Missing evidence
@@ -77,16 +115,25 @@ def create_research_task(agent, claim_task):
 
         - Claim investigated
         - Verification date
+        - Current/recent evidence
         - Evidence supporting the claim
         - Evidence contradicting the claim
+        - Historical/background information
         - Important findings
         - Sources consulted
+        - Publication dates of important sources
         - Key dates
         - Important uncertainties
         - Research conclusion
 
-        For time-sensitive claims, clearly state whether
-        current/recent evidence was found.
+        For time-sensitive claims, clearly state:
+
+        1. Whether current evidence was found.
+        2. Whether recent evidence was found.
+        3. Whether only historical evidence was found.
+
+        Do not use historical sources as evidence of what
+        happened on the verification date.
 
         Include source names and URLs whenever available.
 
