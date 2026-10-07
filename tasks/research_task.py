@@ -1,11 +1,32 @@
 from crewai import Task
+from datetime import date
 
 
 def create_research_task(agent, claim_task):
 
+    verification_date = date.today().strftime("%d %B %Y")
+
     task = Task(
-        description="""
+        description=f"""
         Investigate the claim analysis produced by the Claim Analyst.
+
+        IMPORTANT:
+        The current verification date is {verification_date}.
+
+        Resolve relative time expressions such as:
+        - today
+        - yesterday
+        - tomorrow
+        - this week
+        - currently
+        - recently
+
+        relative to the current verification date.
+
+        If the claim contains a time-sensitive expression such as
+        "today", "yesterday", "currently", or "recently", prioritize
+        the most recent available evidence and explicitly check whether
+        the claimed event occurred on or around the relevant date.
 
         Conduct web research to find reliable evidence
         relevant to the claim.
@@ -35,6 +56,9 @@ def create_research_task(agent, claim_task):
         - Scientific publications
         - Reputable news organizations
 
+        For time-sensitive claims, prioritize recent sources
+        over older historical sources.
+
         Compare information from multiple sources whenever
         possible.
 
@@ -52,6 +76,7 @@ def create_research_task(agent, claim_task):
         Produce a structured research report containing:
 
         - Claim investigated
+        - Verification date
         - Evidence supporting the claim
         - Evidence contradicting the claim
         - Important findings
@@ -59,6 +84,9 @@ def create_research_task(agent, claim_task):
         - Key dates
         - Important uncertainties
         - Research conclusion
+
+        For time-sensitive claims, clearly state whether
+        current/recent evidence was found.
 
         Include source names and URLs whenever available.
 
