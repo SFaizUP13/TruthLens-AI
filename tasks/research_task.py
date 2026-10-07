@@ -1,13 +1,11 @@
 from crewai import Task
 
 
-def create_research_task(agent, claim_analysis):
+def create_research_task(agent, claim_task):
 
     task = Task(
-        description=f"""
-        Investigate the following claim analysis:
-
-        {claim_analysis}
+        description="""
+        Investigate the claim analysis produced by the Claim Analyst.
 
         Conduct web research to find reliable evidence
         relevant to the claim.
@@ -31,9 +29,20 @@ def create_research_task(agent, claim_analysis):
 
         Search for multiple reliable sources.
 
-        Give priority to official organizations,
-        universities, scientific publications and
-        reputable news organizations.
+        Give priority to:
+        - Official government organizations
+        - Universities
+        - Scientific publications
+        - Reputable news organizations
+
+        Compare information from multiple sources whenever
+        possible.
+
+        Clearly distinguish between:
+        - Evidence supporting the claim
+        - Evidence contradicting the claim
+        - Missing evidence
+        - Important uncertainties
 
         Do not make a final TRUE/FALSE verdict.
         The final verdict will be produced by another agent.
@@ -54,10 +63,14 @@ def create_research_task(agent, claim_analysis):
         Include source names and URLs whenever available.
 
         Do not invent sources.
+
         Do not provide a final TRUE/FALSE verdict.
         """,
 
-        agent=agent
+        agent=agent,
+
+        # Use the output of the Claim Analyst as context
+        context=[claim_task]
     )
 
     return task
