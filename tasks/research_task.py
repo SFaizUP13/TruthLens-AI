@@ -88,6 +88,49 @@ def create_research_task(agent, claim_task):
         what happened on the verification date.
 
         ============================================================
+        SOURCE VERIFICATION AND ANTI-HALLUCINATION RULES
+        ============================================================
+
+        Before using a source as evidence:
+
+        1. Retrieve and examine the actual source content whenever
+           possible.
+
+        2. Confirm that the source directly supports the statement
+           attributed to it.
+
+        3. Never infer an article's content from its headline,
+           URL, publication date, or another article.
+
+        4. Never claim to have read an article if its content was
+           not successfully retrieved.
+
+        5. If a source cannot be retrieved or verified, label it
+           "UNVERIFIED SOURCE" and explain the limitation.
+
+        6. Do not invent quotations, article contents, publication
+           dates, updates, or official announcements.
+
+        7. Distinguish verified facts from assumptions and
+           inferences.
+
+        8. An article published before the alleged event cannot,
+           by itself, establish whether that event subsequently
+           occurred.
+
+        9. An official profile listing a person in a position
+           is relevant evidence of their status, but its strength
+           depends on how current and reliable the information is.
+
+        10. Do not describe an unverified source as evidence
+            contradicting the claim.
+
+        11. If current sources cannot be retrieved, clearly report
+            this limitation instead of presenting the search as
+            conclusive.
+
+
+        ============================================================
         AVOID ABSENCE-OF-EVIDENCE ERRORS
         ============================================================
 
@@ -234,6 +277,11 @@ def create_research_task(agent, claim_task):
         - Was current official status found?
         - Was recent evidence found?
         - Was only historical/background evidence found?
+
+        - State whether the source content was actually retrieved.
+        - Identify unverified sources separately.
+        - Explain when evidence is indirect or outdated.
+        - Never infer source content that was not examined.
 
         If no current supporting evidence was found, say:
 
