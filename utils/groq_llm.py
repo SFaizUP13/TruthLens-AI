@@ -3,15 +3,54 @@ from openai import OpenAI
 from crewai.llms.base_llm import BaseLLM
 
 
+MODEL = "openai/gpt-oss-20b"
+
+
+def create_client():
+    return OpenAI(
+        api_key=st.secrets["GROQ_API_KEY"],
+        base_url="https://api.groq.com/openai/v1"
+    )
+
+
+def clean_messages(messages):
+    """Remove unnecessary CrewAI message metadata."""
+
+    cleaned = []
+
+    for message in messages:
+        if isinstance(message, dict):
+            role = message.get("role")
+            content = message.get("content", "")
+
+            if role and content:
+                cleaned.append({
+                    "role": role,
+                    "content": content
+                })
+
+    return cleaned
+
+
+def log_usage(response, agent_name):
+    """Record token usage in Streamlit Cloud logs."""
+
+    usage = getattr(response, "usage", None)
+
+    if usage:
+        print(
+            f"[TOKEN USAGE] {agent_name}: "
+            f"input={usage.input_tokens}, "
+            f"output={usage.output_tokens}, "
+            f"total={usage.total_tokens}"
+        )
+
+
 class GroqLLM(BaseLLM):
 
     def __init__(self):
-        super().__init__(model="openai/gpt-oss-20b")
-
-        self.client = OpenAI(
-            api_key=st.secrets["GROQ_API_KEY"],
-            base_url="https://api.groq.com/openai/v1"
-        )
+        super().__init__(model=MODEL)
+        self.client = create_client()
 
     def call(
         self,
@@ -24,21 +63,29 @@ class GroqLLM(BaseLLM):
         **kwargs
     ):
         response = self.client.responses.create(
-            model="openai/gpt-oss-20b",
-            input=messages
+            model=MODEL,
+            input=clean_messages(messages),
+            max_output_tokens=700,
+            reasoning={"effort": "low"}
         )
 
-        return response.output_text
+        log_usage(response, "Claim Analyst")
+
+        result = response.output_text
+
+        if not result:
+            raise ValueError(
+                "Claim Analyst returned an empty response."
+            )
+
+        return result
+
 
 class GroqResearchLLM(BaseLLM):
 
     def __init__(self):
-        super().__init__(model="openai/gpt-oss-20b")
-
-        self.client = OpenAI(
-            api_key=st.secrets["GROQ_API_KEY"],
-            base_url="https://api.groq.com/openai/v1"
-        )
+        super().__init__(model=MODEL)
+        self.client = create_client()
 
     def call(
         self,
@@ -50,35 +97,33 @@ class GroqResearchLLM(BaseLLM):
         response_model=None,
         **kwargs
     ):
+        response = self.client.responses.create(
+            model=MODEL,
+            input=clean_messages(messages),
 
-        # Clean CrewAI messages before sending them to Groq
-        clean_messages = []
-
-        for message in messages:
-
-            clean_message = {
-                "role": message.get("role"),
-                "content": message.get("content", "")
-            }
-
-            clean_messages.append(clean_message)
-
-        response = self.client.chat.completions.create(
-            model="openai/gpt-oss-20b",
-            messages=clean_messages,
+            # Enable current web research.
             tools=[
-                {
-                    "type": "browser_search"
-                }
+                {"type": "browser_search"}
             ],
-            tool_choice="required"
+
+            # Research must use the search tool.
+            tool_choice="required",
+
+            # Limit research calls per response.
+            max_tool_calls=2,
+
+            # Limit generated and reasoning tokens.
+            max_output_tokens=1600,
+            reasoning={"effort": "low"}
         )
 
-        result = response.choices[0].message.content
+        log_usage(response, "Research Agent")
+
+        result = response.output_text
 
         if not result:
             raise ValueError(
-                "Groq Research Agent returned an empty response."
+                "Research Agent returned an empty response."
             )
 
         return result
