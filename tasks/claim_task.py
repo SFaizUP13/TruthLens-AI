@@ -4,38 +4,34 @@ from crewai import Task
 def create_claim_task(agent, claim):
 
     task = Task(
-
         description=f"""
-        Analyze the following claim:
+        Analyze this claim for fact-checking:
 
         "{claim}"
 
         Identify:
-
         1. The main factual claim.
-        2. Any people, organizations or places mentioned.
-        3. Any dates or time references.
-        4. Specific facts that need verification.
-        5. What evidence should be collected.
+        2. People, organizations, and places.
+        3. Relevant dates and time expressions.
+        4. Questions that need verification.
+        5. Evidence needed to verify the claim.
 
-        Do not determine whether the claim is true or
-        false yet.
+        Do not decide whether the claim is true or false.
+        Do not invent missing details.
 
-        Your task is only to prepare the claim for
-        further investigation.
+        Keep the analysis concise and factual.
         """,
 
         expected_output="""
-        Provide a structured analysis containing:
-
+        Provide a concise report with:
         - Main claim
         - Key entities
-        - Dates
-        - Locations
+        - Dates and locations
         - Verification questions
         - Required evidence
 
-        Do not invent information.
+        Use short bullet points.
+        Do not give a final verdict.
         """,
 
         agent=agent
