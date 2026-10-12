@@ -30,7 +30,7 @@ def create_claim_agent():
 
         llm=llm,
 
-        verbose=True
+        verbose=False
     )
 
     return claim_agent
