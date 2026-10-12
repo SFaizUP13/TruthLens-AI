@@ -48,7 +48,7 @@ def run_claim_analysis(claim):
 
         process=Process.sequential,
 
-        verbose=True
+        verbose=False
     )
 
     result = crew.kickoff()
