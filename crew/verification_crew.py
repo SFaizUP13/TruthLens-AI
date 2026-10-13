@@ -26,9 +26,13 @@ def run_claim_analysis(claim):
 
     research_agent = create_research_agent()
 
+    # Pass only the original claim to the Research Agent.
+    # Avoid injecting the full Claim Analyst report.
+
     research_task = create_research_task(
         research_agent,
-        claim_task
+        None,
+        claim
     )
 
     # -------------------------
