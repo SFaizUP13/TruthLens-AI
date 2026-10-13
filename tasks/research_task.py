@@ -2,7 +2,7 @@ from crewai import Task
 from datetime import date
 
 
-def create_research_task(agent, claim_task):
+def create_research_task(agent, claim_task, claim):
 
     verification_date = date.today().strftime("%d %B %Y")
 
