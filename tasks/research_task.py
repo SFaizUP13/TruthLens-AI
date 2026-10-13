@@ -3,80 +3,46 @@ from datetime import date
 
 
 def create_research_task(agent, claim):
-
     verification_date = date.today().strftime("%d %B %Y")
 
     task = Task(
         description=f"""
-        Investigate the claim analysis provided by the Claim Analyst.
-        Claim to investigate: "{claim}"
+        Verify the following claim using web research.
 
-        Use this claim as the primary research target.
-        Resolve "today" using the verification date above.
+        CLAIM: "{claim}"
+        VERIFICATION DATE: {verification_date}
 
-        Verification date: {verification_date}
+        REQUIREMENTS:
+        1. Search for current evidence relevant to the claim.
+        2. Prioritize official sources and reputable news outlets.
+        3. Check source content before relying on it.
+        4. Distinguish supporting evidence from contradicting evidence.
+        5. Include source names, URLs, and publication dates when available.
+        6. Identify outdated, indirect, or unverified sources.
+        7. Never invent sources, quotations, dates, or findings.
+        8. Do not treat missing search results as proof that a claim is false.
+        9. Do not give a final TRUE/FALSE verdict.
+        10. Keep the report concise and evidence-based.
 
-        RESEARCH:
-        1. Investigate the specific claim and relevant dates.
-        2. Search for current information when the claim concerns
-           a recent event.
-        3. Prioritize official sources and reputable news outlets.
-        4. Compare sources when possible.
-        5. Examine the actual source content before relying on it.
-
-        CLASSIFY EVIDENCE:
-        - CURRENT: Published or updated recently and directly
-          relevant to the event.
-        - CURRENT OFFICIAL STATUS: An official source indicating
-          a person's or organization's present status.
-        - RECENT: Relevant information from the recent past.
-        - HISTORICAL: Older information useful only as background.
-        - UNVERIFIED: A source whose relevant content could not
-          be retrieved or confirmed.
-
-        SOURCE RULES:
-        - Include source names, URLs, and dates when available.
-        - Never invent sources, quotations, dates, or findings.
-        - Never claim to have read content that was not retrieved.
-        - Do not infer article contents from headlines or URLs.
-        - An older article cannot establish what happened later.
-        - Clearly identify indirect, outdated, or unverified evidence.
-
-        CONCLUSION RULES:
-        - Distinguish supporting evidence from contradicting evidence.
-        - Absence of news is not proof that an event did not happen.
-        - An outdated official profile may not reflect a recent change.
-        - If current evidence cannot be found, state that limitation.
-        - Do not make the final TRUE/FALSE verdict.
-
-        Keep the report concise. Prioritize evidence quality
-        over the number of sources.
+        Resolve relative dates such as "today" using the verification date.
         """,
 
         expected_output="""
-        Produce a concise research report containing:
+        Return a concise report with these sections:
 
-        1. Claim and verification date.
-        2. Current evidence.
-        3. Current official status, if available.
-        4. Recent and historical evidence.
-        5. Evidence supporting the claim.
-        6. Evidence contradicting or challenging the claim.
-        7. Sources, URLs, dates, and verification status.
-        8. Important uncertainties.
-        9. Research conclusion without a final verdict.
+        1. Claim and verification date
+        2. Current evidence
+        3. Official status, if verified
+        4. Supporting evidence
+        5. Contradicting evidence
+        6. Sources with URLs and dates
+        7. Uncertainties and limitations
+        8. Research conclusion without a final verdict
 
-        Explicitly state whether current supporting evidence
-        was found.
-
-        Never present an unverified source as confirmed evidence.
-        Never conclude that a claim is false solely because
-        no supporting source was found.
-
-        Use concise bullet points and avoid repeating findings.
+        Clearly distinguish verified findings from unverified information.
         """,
 
-        agent=agent,
-          )
+        agent=agent
+    )
 
     return task
