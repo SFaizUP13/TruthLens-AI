@@ -2,13 +2,17 @@ from crewai import Task
 from datetime import date
 
 
-def create_research_task(agent, claim_task, claim):
+def create_research_task(agent, claim):
 
     verification_date = date.today().strftime("%d %B %Y")
 
     task = Task(
         description=f"""
         Investigate the claim analysis provided by the Claim Analyst.
+        Claim to investigate: "{claim}"
+
+        Use this claim as the primary research target.
+        Resolve "today" using the verification date above.
 
         Verification date: {verification_date}
 
@@ -73,7 +77,6 @@ def create_research_task(agent, claim_task, claim):
         """,
 
         agent=agent,
-        context=[claim_task]
-    )
+          )
 
     return task
