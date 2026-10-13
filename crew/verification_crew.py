@@ -9,50 +9,37 @@ from tasks.research_task import create_research_task
 
 def run_claim_analysis(claim):
 
-    # -------------------------
-    # Agent 1: Claim Analyst
-    # -------------------------
-
+    # STEP 1: Run the Claim Analyst independently
     claim_agent = create_claim_agent()
+    claim_task = create_claim_task(claim_agent, claim)
 
-    claim_task = create_claim_task(
-        claim_agent,
-        claim
-    )
-
-    # -------------------------
-    # Agent 2: Research Agent
-    # -------------------------
-
-    research_agent = create_research_agent()
-
-    # Pass only the original claim to the Research Agent.
-    # Avoid injecting the full Claim Analyst report.
-
-    research_task = create_research_task(
-    research_agent,
-    claim
-    )
-    # -------------------------
-    # Crew
-    # -------------------------
-
-    crew = Crew(
-        agents=[
-            claim_agent,
-            research_agent
-        ],
-
-        tasks=[
-            claim_task,
-            research_task
-        ],
-
+    claim_crew = Crew(
+        agents=[claim_agent],
+        tasks=[claim_task],
         process=Process.sequential,
-
         verbose=False
     )
 
-    result = crew.kickoff()
+    claim_result = claim_crew.kickoff()
 
-    return result
+    # STEP 2: Run the Research Agent in a separate crew
+    # Pass the original claim, not the Claim Analyst's full report.
+    research_agent = create_research_agent()
+    research_task = create_research_task(research_agent, claim)
+
+    research_crew = Crew(
+        agents=[research_agent],
+        tasks=[research_task],
+        process=Process.sequential,
+        verbose=False
+    )
+
+    research_result = research_crew.kickoff()
+
+    # STEP 3: Return both results to the Streamlit application
+    return (
+        "## Claim Analysis\n\n"
+        + str(claim_result)
+        + "\n\n## Research Report\n\n"
+        + str(research_result)
+    )
