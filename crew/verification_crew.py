@@ -30,11 +30,9 @@ def run_claim_analysis(claim):
     # Avoid injecting the full Claim Analyst report.
 
     research_task = create_research_task(
-        research_agent,
-        None,
-        claim
+    research_agent,
+    claim
     )
-
     # -------------------------
     # Crew
     # -------------------------
