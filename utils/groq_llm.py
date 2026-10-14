@@ -120,7 +120,7 @@ class GroqResearchLLM(BaseLLM):
 
     log_usage(response, "Research Agent")
 
-result = response.output_text or ""
+    result = response.output_text or ""
 
 # Collect source citations returned by the API.
 sources = []
