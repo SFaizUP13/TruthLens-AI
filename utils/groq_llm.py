@@ -110,7 +110,7 @@ class GroqResearchLLM(BaseLLM):
             tool_choice="required",
 
             # Limit research calls per response.
-            max_tool_calls=2,
+            max_tool_calls=1,
 
             # Limit generated and reasoning tokens.
             max_output_tokens=1600,
