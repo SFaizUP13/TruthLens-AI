@@ -48,9 +48,10 @@ def log_usage(response, agent_name):
 
 class GroqLLM(BaseLLM):
 
-    def __init__(self):
-        super().__init__(model=MODEL)
-        self.client = create_client()
+    def __init__(self, agent_name="Claim Analyst"):
+    super().__init__(model=MODEL)
+    self.client = create_client()
+    self.agent_name = agent_name
 
     def call(
         self,
@@ -69,7 +70,7 @@ class GroqLLM(BaseLLM):
             reasoning={"effort": "low"}
         )
 
-        log_usage(response, "Claim Analyst")
+        log_usage(response, self.agent_name)
 
         result = response.output_text
 
