@@ -120,51 +120,9 @@ class GroqResearchLLM(BaseLLM):
 
 log_usage(response, "Research Agent")
 
-result = response.output_text or ""
+result = response.output_text
 
-# Collect source citations returned by the API.
-sources = []
-
-for item in response.output:
-    # Convert SDK objects to dictionaries where supported.
-    if hasattr(item, "model_dump"):
-        item_data = item.model_dump()
-    elif isinstance(item, dict):
-        item_data = item
-    else:
-        continue
-
-    for content in item_data.get("content", []):
-        if not isinstance(content, dict):
-            continue
-
-        for annotation in content.get("annotations", []):
-            if not isinstance(annotation, dict):
-                continue
-
-            if annotation.get("type") == "url_citation":
-                url = annotation.get("url", "")
-                title = annotation.get("title", "")
-
-                if url and url not in [
-                    source["url"] for source in sources
-                ]:
-                    sources.append({
-                        "title": title or "Untitled source",
-                        "url": url
-                    })
-
-# Append citations only when the API actually returns them.
-if sources:
-    result += "\n\nSOURCES RETURNED BY WEB SEARCH:\n"
-
-    for index, source in enumerate(sources, start=1):
-        result += (
-            f"\n{index}. {source['title']}"
-            f"\n   URL: {source['url']}\n"
-        )
-
-if not result.strip():
+if not result:
     raise ValueError("Research Agent returned an empty response.")
 
 return result
