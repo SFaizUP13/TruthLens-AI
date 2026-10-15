@@ -166,5 +166,4 @@ for item in response.output:
 
         if not result.strip():
             raise ValueError("Research Agent returned an empty response.")
-
         return result
