@@ -155,16 +155,16 @@ for item in response.output:
                     })
 
 # Append citations only when the API actually returns them.
-if sources:
-    result += "\n\nSOURCES RETURNED BY WEB SEARCH:\n"
+        if sources:
+            result += "\n\nSOURCES RETURNED BY WEB SEARCH:\n"
 
-    for index, source in enumerate(sources, start=1):
-        result += (
-            f"\n{index}. {source['title']}"
-            f"\n   URL: {source['url']}\n"
-        )
+            for index, source in enumerate(sources, start=1):
+                result += (
+                    f"\n{index}. {source['title']}"
+                    f"\n   URL: {source['url']}\n"
+                )
 
-if not result.strip():
-    raise ValueError("Research Agent returned an empty response.")
+        if not result.strip():
+            raise ValueError("Research Agent returned an empty response.")
 
-return result
+        return result
