@@ -154,7 +154,7 @@ for item in response.output:
                         "url": url
                     })
 
-# Append citations only when the API actually returns them.
+        # Append citations only when the API actually returns them.
         if sources:
             result += "\n\nSOURCES RETURNED BY WEB SEARCH:\n"
 
@@ -166,4 +166,5 @@ for item in response.output:
 
         if not result.strip():
             raise ValueError("Research Agent returned an empty response.")
+
         return result
