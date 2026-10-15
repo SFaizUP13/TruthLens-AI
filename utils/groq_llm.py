@@ -76,7 +76,7 @@ class GroqLLM(BaseLLM):
 
         if not result:
             raise ValueError(
-                "Claim Analyst returned an empty response."
+                f"{self.agent_name} returned an empty response."
             )
 
         return result
@@ -101,60 +101,53 @@ class GroqResearchLLM(BaseLLM):
         response = self.client.responses.create(
             model=MODEL,
             input=clean_messages(messages),
-
-            # Enable current web research.
             tools=[
                 {"type": "browser_search"}
             ],
-
-            # Research must use the search tool.
             tool_choice="required",
-
-            # Limit research calls per response.
             max_tool_calls=1,
-
-            # Limit generated and reasoning tokens.
             max_output_tokens=1600,
             reasoning={"effort": "low"}
         )
 
-    log_usage(response, "Research Agent")
+        log_usage(response, "Research Agent")
 
-    result = response.output_text or ""
+        result = response.output_text or ""
 
-# Collect source citations returned by the API.
-sources = []
+        # Collect source citations returned by the API.
+        sources = []
 
-for item in response.output:
-    # Convert SDK objects to dictionaries where supported.
-    if hasattr(item, "model_dump"):
-        item_data = item.model_dump()
-    elif isinstance(item, dict):
-        item_data = item
-    else:
-        continue
-
-    for content in item_data.get("content", []):
-        if not isinstance(content, dict):
-            continue
-
-        for annotation in content.get("annotations", []):
-            if not isinstance(annotation, dict):
+        for item in response.output:
+            # Convert SDK objects to dictionaries where supported.
+            if hasattr(item, "model_dump"):
+                item_data = item.model_dump()
+            elif isinstance(item, dict):
+                item_data = item
+            else:
                 continue
 
-            if annotation.get("type") == "url_citation":
-                url = annotation.get("url", "")
-                title = annotation.get("title", "")
+            # Inspect content items for URL citations.
+            for content in item_data.get("content", []):
+                if not isinstance(content, dict):
+                    continue
 
-                if url and url not in [
-                    source["url"] for source in sources
-                ]:
-                    sources.append({
-                        "title": title or "Untitled source",
-                        "url": url
-                    })
+                for annotation in content.get("annotations", []):
+                    if not isinstance(annotation, dict):
+                        continue
 
-        # Append citations only when the API actually returns them.
+                    if annotation.get("type") == "url_citation":
+                        url = annotation.get("url", "")
+                        title = annotation.get("title", "")
+
+                        if url and url not in [
+                            source["url"] for source in sources
+                        ]:
+                            sources.append({
+                                "title": title or "Untitled source",
+                                "url": url
+                            })
+
+        # Append citations only when the API returns them.
         if sources:
             result += "\n\nSOURCES RETURNED BY WEB SEARCH:\n"
 
@@ -165,6 +158,8 @@ for item in response.output:
                 )
 
         if not result.strip():
-            raise ValueError("Research Agent returned an empty response.")
+            raise ValueError(
+                "Research Agent returned an empty response."
+            )
 
         return result
