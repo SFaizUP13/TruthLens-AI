@@ -2,6 +2,8 @@ import streamlit as st
 from openai import OpenAI
 from crewai.llms.base_llm import BaseLLM
 
+from utils.source_verifier import check_source_url
+
 
 MODEL = "openai/gpt-oss-20b"
 
@@ -118,7 +120,7 @@ class GroqResearchLLM(BaseLLM):
         sources = []
 
         for item in response.output:
-            # Convert SDK objects to dictionaries where supported.
+
             if hasattr(item, "model_dump"):
                 item_data = item.model_dump()
             elif isinstance(item, dict):
@@ -126,16 +128,18 @@ class GroqResearchLLM(BaseLLM):
             else:
                 continue
 
-            # Inspect content items for URL citations.
             for content in item_data.get("content", []):
+
                 if not isinstance(content, dict):
                     continue
 
                 for annotation in content.get("annotations", []):
+
                     if not isinstance(annotation, dict):
                         continue
 
                     if annotation.get("type") == "url_citation":
+
                         url = annotation.get("url", "")
                         title = annotation.get("title", "")
 
@@ -147,14 +151,32 @@ class GroqResearchLLM(BaseLLM):
                                 "url": url
                             })
 
-        # Append citations only when the API returns them.
+        # Check accessibility of up to three cited URLs.
+        # This makes ordinary HTTP requests, not LLM calls.
+        for source in sources[:3]:
+            try:
+                source["accessibility"] = check_source_url(
+                    source["url"],
+                    timeout=4
+                )
+            except Exception:
+                source["accessibility"] = "ACCESSIBILITY_UNCONFIRMED"
+
+        # Avoid excessive network delays if there are many sources.
+        for source in sources[3:]:
+            source["accessibility"] = "NOT_CHECKED_LIMIT"
+
+        # Append citation details and accessibility status.
         if sources:
             result += "\n\nSOURCES RETURNED BY WEB SEARCH:\n"
 
             for index, source in enumerate(sources, start=1):
+
                 result += (
                     f"\n{index}. {source['title']}"
-                    f"\n   URL: {source['url']}\n"
+                    f"\n   URL: {source['url']}"
+                    f"\n   Accessibility check: "
+                    f"{source['accessibility']}\n"
                 )
 
         if not result.strip():
