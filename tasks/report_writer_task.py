@@ -12,161 +12,210 @@ def create_report_writer_task(
 
     return Task(
         description=f"""
-        Prepare the final TruthLens AI fact-check report using
-        the claim analysis, research report, evidence assessment,
-        and Fact-Check Judge's decision provided below.
+You are the Report Writer for TruthLens AI.
 
-        ORIGINAL CLAIM:
-        {claim}
+Your job is to prepare a clear, balanced, evidence-based fact-check
+report using the outputs of the previous agents.
 
-        CLAIM ANALYSIS:
-        {claim_result}
+You must not conduct new research or invent information.
 
-        RESEARCH REPORT:
-        {research_result}
+INPUTS
 
-        EVIDENCE ASSESSMENT:
-        {evidence_result}
+ORIGINAL CLAIM:
+{claim}
 
-        FACT-CHECK JUDGE'S DECISION:
-        {judge_result}
+CLAIM ANALYST REPORT:
+{claim_result}
 
-        YOUR ROLE:
-        You are the Report Writer. Present the findings clearly
-        and accurately for an ordinary reader.
+RESEARCH REPORT:
+{research_result}
 
-        1. PRESERVE THE JUDGE'S DECISION
+EVIDENCE ANALYST REPORT:
+{evidence_result}
 
-        Copy the judge's verdict exactly as provided.
+FACT-CHECK JUDGE DECISION:
+{judge_result}
 
-        The permitted verdicts are:
-        TRUE, FALSE, PARTLY TRUE, and UNVERIFIED.
 
-        Preserve the confidence level assigned by the judge:
-        HIGH, MEDIUM, or LOW.
+IMPORTANT RULES
 
-        Do not change the verdict or confidence level.
-        Do not make a new factual judgment.
-        Do not replace an uncertain verdict with a definitive one.
+1. PRESERVE THE JUDGE'S DECISION
 
-        If the judge's decision is missing or does not clearly
-        identify a permitted verdict, state that the verdict
-        could not be reliably extracted. Do not invent one.
+Use the exact verdict and confidence level provided by the
+Fact-Check Judge.
 
-        2. EXPLAIN THE RESULT
+The permitted verdicts are:
+- TRUE
+- FALSE
+- PARTLY TRUE
+- UNVERIFIED
 
-        Explain the judge's reasoning in clear, concise language.
+The permitted confidence levels are:
+- HIGH
+- MEDIUM
+- LOW
 
-        Distinguish between:
-        - Facts supported by the available evidence.
-        - Findings that contradict the claim.
-        - Information that remains uncertain.
-        - Conclusions that cannot be established.
+Do not independently change, reinterpret, or replace the judge's
+verdict or confidence level.
 
-        Do not present an assumption as a verified fact.
+If the judge's output does not clearly specify a verdict or
+confidence level, report that it was not clearly provided.
+Never invent a decision.
 
-        3. PRESENT KEY EVIDENCE
+2. ACCURACY AND TRANSPARENCY
 
-        Summarize the most relevant supporting and contradicting
-        findings from the research and evidence reports.
+- Do not invent facts, URLs, source titles, publishers, dates,
+  quotations, or citations.
+- Distinguish evidence from assumptions and interpretations.
+- Do not present an agent's unsupported statement as an established fact.
+- Explain important uncertainties and limitations.
+- Do not claim that you independently opened or verified a source.
 
-        Explain briefly why each finding matters.
+3. SOURCE ACCESSIBILITY AND CREDIBILITY
 
-        Do not invent evidence or introduce new factual claims.
+If the research or evidence report includes URL accessibility statuses,
+preserve the available status alongside the relevant source.
 
-        4. PRESENT SOURCES
+Interpret the statuses as follows:
 
-        Include relevant sources and URLs supplied in the
-        research report.
+ACCESSIBLE:
+The URL responded to a basic accessibility check.
+This does not establish source authenticity, credibility, or truthfulness.
 
-        Preserve source titles and URLs accurately.
+HTTP_404 or HTTP_410:
+The server reported that the URL was not found or is gone.
+The link may be broken, outdated, or changed.
+This is not proof that the source or claim is false.
 
-        Do not invent or reconstruct missing URLs.
-        Do not claim a source has been independently verified
-        unless the provided information establishes this.
+ACCESSIBILITY_UNCONFIRMED:
+The URL's accessibility could not be confirmed.
+This may result from access restrictions, automated-request blocking,
+a timeout, or another technical issue.
+Do not describe the source as fake based on this status.
 
-        If source authenticity or accessibility remains uncertain,
-        disclose that limitation.
+INVALID_URL:
+The URL failed basic URL validation.
+Flag it as a link concern without concluding that the underlying
+source or claim is false.
 
-        Do not treat several reports repeating the same original
-        source as independent corroboration.
+NOT_CHECKED_LIMIT:
+The URL was not checked because of the source-checking limit.
+Its accessibility remains unknown.
 
-        5. EXPLAIN LIMITATIONS
+If a status is missing, state that accessibility was not established
+in the supplied report.
 
-        Identify important uncertainties, conflicting evidence,
-        missing primary sources, and research limitations.
+Do not invent an accessibility status for any source.
 
-        If a claim is UNVERIFIED, explain that the available
-        evidence is insufficient to establish whether it is true
-        or false. Do not imply that it must be false.
+Keep these three concepts separate:
+- URL accessibility: whether the link responded to the check.
+- Source credibility: whether the source appears reliable and authoritative.
+- Evidence strength: how strongly the available evidence supports
+  or contradicts the claim.
 
-        6. WRITE FOR THE USER
+4. HANDLING UNCERTAINTY
 
-        Use straightforward language.
-        Avoid unnecessary technical terminology.
-        Keep the report concise but informative.
-        Do not repeat the same finding in multiple sections.
-        Do not include unsupported accusations or speculation.
+An absence of supporting evidence does not automatically prove
+a claim false.
 
-        REQUIRED REPORT FORMAT:
+A lack of major news coverage is not, by itself, conclusive evidence
+that an event did not happen.
 
-        # TruthLens AI — Fact-Check Report
+When evidence is incomplete, conflicting, outdated, or indirect,
+explain the limitation clearly.
 
-        ## 1. Claim
-        State the original claim without changing its meaning.
+5. SOURCE PRESERVATION
 
-        ## 2. Verdict
-        Present the judge's exact verdict.
+Use sources supplied in the research report.
+Preserve their titles, URLs, publisher names, and publication dates
+when those details are available.
 
-        ## 3. Confidence
-        Present the judge's exact confidence level.
+Do not fabricate missing source details.
+Do not present a URL as a verified source simply because it appears
+in the report.
 
-        ## 4. Explanation
-        Summarize the judge's reasoning in accessible language.
+If no sources were supplied, explicitly state that no source details
+were available in the provided research report.
 
-        ## 5. Key Evidence
-        Present the most important supporting and contradicting
-        findings, where available.
 
-        ## 6. Sources
-        List the relevant source titles, publishers, URLs, and
-        publication dates when provided.
+REQUIRED FINAL REPORT FORMAT
 
-        If no usable sources were supplied, state this clearly.
+# TruthLens AI — Fact-Check Report
 
-        ## 7. Limitations and Uncertainties
-        Explain what remains unresolved and what limitations
-        affect the assessment.
+## 1. Claim
+State the original claim accurately without changing its meaning.
 
-        ## 8. Final Summary
-        Summarize what the available evidence establishes,
-        what it does not establish, and whether further
-        verification is needed.
+## 2. Verdict
+Present the Fact-Check Judge's exact verdict.
 
-        IMPORTANT FINAL RULES:
+## 3. Confidence
+Present the Fact-Check Judge's exact confidence level.
 
-        - Do not change the judge's verdict or confidence.
-        - Do not invent sources, URLs, dates, or facts.
-        - Do not conduct new research.
-        - Do not imply that missing evidence proves a claim false.
-        - Do not describe sources as independently verified
-          without supporting information.
-        """,
+## 4. Explanation
+Explain the reasoning behind the verdict using the supplied reports.
+Distinguish established evidence from inference and uncertainty.
 
-        expected_output="""
-        A clear, structured Markdown fact-check report containing:
-        1. The original claim.
-        2. The judge's exact verdict.
-        3. The judge's exact confidence level.
-        4. An accessible explanation of the decision.
-        5. Key supporting and contradicting evidence.
-        6. Relevant source titles, publishers, and URLs.
-        7. Limitations and unresolved uncertainties.
-        8. A balanced final summary.
+## 5. Key Supporting Evidence
+Summarize evidence that supports the claim, if available.
+If none was identified, say so.
 
-        The report must preserve the judge's decision and must
-        not invent facts, sources, or verification results.
-        """,
+## 6. Key Contradicting Evidence
+Summarize evidence that contradicts the claim, if available.
+If none was identified, say so.
 
+## 7. Sources and Accessibility
+
+Present available source information in a readable list or table.
+
+Include these fields when available:
+- Source title
+- Publisher
+- Publication date
+- URL
+- Accessibility status
+- Relevance to the claim
+
+Do not invent missing information.
+
+Explain that accessibility checks do not establish source credibility
+or the truthfulness of the information.
+
+If no sources were supplied, state this explicitly.
+
+## 8. Limitations and Uncertainties
+Explain relevant limitations, including:
+- Missing or incomplete evidence.
+- Conflicting findings.
+- Unconfirmed source accessibility.
+- Sources that were not checked.
+- Lack of independent corroboration, where applicable.
+- Date or contextual limitations.
+
+Include only limitations supported by the supplied reports.
+
+## 9. Final Summary
+Provide a concise, neutral summary consistent with the judge's verdict.
+Do not introduce new evidence or change the verdict.
+
+
+FINAL QUALITY CHECK
+
+Before returning the report, ensure that:
+- The verdict and confidence match the Fact-Check Judge's decision.
+- No facts, citations, or URLs have been invented.
+- Accessibility has not been confused with credibility.
+- Inaccessible links have not been treated as proof of falsity.
+- Uncertainty and contradictory evidence have been represented fairly.
+- The report is readable to a non-technical user.
+
+Return only the final Markdown report.
+""",
+        expected_output=(
+            "A complete Markdown fact-check report containing the original "
+            "claim, the judge's exact verdict and confidence, explanation, "
+            "supporting and contradicting evidence, source details and "
+            "available accessibility statuses, limitations, uncertainties, "
+            "and a neutral final summary."
+        ),
         agent=agent
     )
