@@ -5,149 +5,135 @@ def create_evidence_task(agent, claim, research_result):
 
     return Task(
         description=f"""
-        Evaluate the quality, relevance, and strength of the
-        research evidence collected for the following claim.
+You are the Evidence Analyst for TruthLens AI.
 
-        CLAIM:
-        {claim}
+Your responsibility is to evaluate the quality, relevance, and
+limitations of the evidence collected by the Research Agent.
 
-        RESEARCH REPORT:
-        {research_result}
+IMPORTANT RULES:
+- Do not conduct new web research.
+- Do not produce the final TRUE/FALSE verdict.
+- Do not invent facts, sources, URLs, dates, or quotations.
+- Base your analysis on the supplied claim and research report.
+- Clearly distinguish reported evidence from verified facts.
+- Do not assume that a source is reliable merely because it appears
+  in the research report.
 
-        YOUR ROLE:
-        You are an Evidence Analyst. Your responsibility is to
-        critically evaluate the available evidence before it is
-        passed to the Fact-Check Judge.
+CLAIM TO VERIFY:
+{claim}
 
-        1. SOURCE CREDIBILITY
+RESEARCH REPORT:
+{research_result}
 
-        For each important source in the research report:
-        - Identify the publisher or issuing organization.
-        - Assess whether it is an official or primary source,
-          a reputable secondary source, or an unverified source.
-        - Consider the publisher's expertise and relevance to
-          the subject.
-        - Identify missing or questionable source information.
-        - Do not assume a source is reliable merely because it
-          appears professional or has a familiar name.
+EVALUATION INSTRUCTIONS:
 
-        Important:
-        You are evaluating the source information provided in the
-        research report. Do not claim to have independently opened
-        or verified a URL unless you actually did so.
+1. SOURCE CREDIBILITY
+Assess the apparent credibility of each cited source using the
+information available in the research report.
 
-        2. EVIDENCE RELEVANCE
+Prefer official primary sources, original scientific research,
+and reputable journalism where appropriate.
 
-        Determine whether each important finding:
-        - Directly supports the claim.
-        - Directly contradicts the claim.
-        - Provides useful background but does not establish
-          whether the claim is true or false.
-        - Is too weak or unclear to draw a conclusion from.
+Do not claim that you independently verified a publisher's identity
+or reputation unless the supplied evidence supports that conclusion.
 
-        Explain why the evidence is relevant to the claim.
+2. URL ACCESSIBILITY STATUS
 
-        3. INDEPENDENT CORROBORATION
+The research report may contain an "Accessibility check" for a URL.
+Interpret these statuses as follows:
 
-        Assess whether multiple sources independently support
-        the same finding.
+- ACCESSIBLE:
+  The URL responded to a basic HTTP accessibility check.
+  This does NOT prove that the source is authentic, independent,
+  authoritative, or factually correct.
 
-        Do not treat several articles repeating the same original
-        report as independent confirmation.
+- HTTP_404 or HTTP_410:
+  The server reported that the resource was not found or is gone.
+  The URL may be broken, outdated, or changed.
+  This status alone does NOT prove that the source or claim is fake.
 
-        If the research report does not establish whether sources
-        are independent, explicitly state this limitation.
+- ACCESSIBILITY_UNCONFIRMED:
+  Accessibility could not be confirmed. The website may block automated
+  requests, restrict access, time out, or have another technical issue.
+  Do NOT treat this status as evidence that the source is fake.
 
-        4. DATES AND CONTEXT
+- INVALID_URL:
+  The supplied URL did not pass basic URL validation.
+  Flag it for further review, but do not infer that the underlying
+  source or claim is necessarily false.
 
-        Check the dates and context provided in the research report.
+- NOT_CHECKED_LIMIT:
+  The URL was not checked because of the source-checking limit.
+  Its accessibility remains unknown.
 
-        Identify:
-        - Outdated evidence.
-        - Differences between event dates and publication dates.
-        - Evidence referring to a different person, event, or
-          time period.
-        - Missing context that could change the interpretation.
+- Missing accessibility status:
+  Accessibility has not been established by the supplied report.
 
-        Do not invent dates or facts that are not provided.
+Never describe a URL as independently verified merely because it
+has an accessibility status.
 
-        5. CONTRADICTORY EVIDENCE
+3. EVIDENCE QUALITY
+Evaluate:
+- Whether the evidence directly addresses the claim.
+- Whether the source provides supporting or contradicting evidence.
+- Whether independent sources corroborate the same information.
+- Whether the evidence is current and relevant to the claim's date.
+- Whether important context is missing.
+- Whether the report relies on indirect evidence or assumptions.
 
-        Compare supporting and contradicting findings.
+Do not count multiple articles repeating the same original report
+as independent corroboration without evidence of independence.
 
-        Identify important disagreements between sources and
-        explain which evidence appears stronger based on source
-        quality, relevance, directness, and available corroboration.
+4. CONTRADICTORY EVIDENCE
+Identify meaningful disagreements between sources.
+Explain whether the disagreement may result from different dates,
+contexts, interpretations, or incomplete information.
 
-        Do not dismiss contradictory evidence without explanation.
+5. LIMITATIONS AND UNCERTAINTY
+Clearly state what the available evidence cannot establish.
+An absence of evidence is not automatically evidence that a claim
+is false.
 
-        6. UNCERTAINTY AND LIMITATIONS
+Do not turn an inaccessible URL into proof that a claim is false.
+Do not turn an accessible URL into proof that a claim is true.
 
-        Identify:
-        - Missing primary sources.
-        - Unverified URLs or source details.
-        - Insufficient or indirect evidence.
-        - Unresolved disagreements.
-        - Limitations of the available research.
+OUTPUT FORMAT:
 
-        Remember that failure to find evidence does not
-        automatically prove that a claim is false.
+## Evidence Quality Assessment
+Assess the overall relevance and quality of the available evidence.
 
-        7. STRICT RULES
+## Source Credibility
+Discuss the apparent credibility and limitations of the cited sources.
 
-        - Do not conduct new web research.
-        - Do not invent sources, facts, dates, or quotations.
-        - Do not claim that you independently verified sources
-          when you did not.
-        - Do not issue a final TRUE or FALSE verdict.
-        - Do not confuse source popularity with source reliability.
-        - Clearly distinguish established facts from assumptions
-          and unresolved questions.
+## URL Accessibility Findings
+List the reported accessibility statuses and explain their meaning.
+If no statuses are provided, state that URL accessibility information
+is unavailable in the supplied report.
 
-        REQUIRED OUTPUT FORMAT:
+## Supporting Evidence
+Summarize evidence that supports the claim, if any.
 
-        A. Claim Being Evaluated
+## Contradicting Evidence
+Summarize evidence that contradicts the claim, if any.
 
-        B. Source Credibility Assessment
-        Identify important sources and assess their reliability
-        using only the available information.
+## Independent Corroboration
+Explain whether the available report establishes independent
+corroboration. Do not assume independence without evidence.
 
-        C. Supporting Evidence
-        Summarize relevant evidence supporting the claim.
+## Limitations and Uncertainty
+Identify missing information, inaccessible sources, date concerns,
+and other relevant limitations.
 
-        D. Contradicting Evidence
-        Summarize relevant evidence contradicting the claim.
-
-        E. Independent Corroboration
-        Explain whether independent confirmation is established.
-
-        F. Evidence Strength
-        Explain which findings are strong, limited, indirect,
-        or inconclusive, and why.
-
-        G. Uncertainties and Limitations
-        Identify missing information and unresolved questions.
-
-        H. Summary for the Fact-Check Judge
-        Provide a balanced assessment of the evidence, including
-        its strongest points and major weaknesses.
-
-        Keep the report concise, factual, and structured.
-        """,
-
-        expected_output="""
-        A structured evidence assessment containing:
-        1. Source credibility assessments.
-        2. Evidence supporting and contradicting the claim.
-        3. Evidence relevance and strength.
-        4. Assessment of independent corroboration.
-        5. Important dates and contextual limitations.
-        6. Uncertainties and unresolved questions.
-        7. A balanced summary for the Fact-Check Judge.
-
-        Do not issue a final TRUE or FALSE verdict.
-        Do not invent facts or claim unperformed verification.
-        """,
-
+## Assessment for the Fact-Check Judge
+Provide a balanced summary of the evidence strength and uncertainty.
+Do not issue a final TRUE, FALSE, PARTLY TRUE, or UNVERIFIED verdict.
+The Fact-Check Judge will make that decision.
+""",
+        expected_output=(
+            "A structured evidence assessment covering source credibility, "
+            "URL accessibility findings, supporting and contradicting "
+            "evidence, independent corroboration, limitations, uncertainty, "
+            "and a balanced summary for the Fact-Check Judge. No final verdict."
+        ),
         agent=agent
     )
