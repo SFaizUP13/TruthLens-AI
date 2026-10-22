@@ -152,6 +152,8 @@ def extract_main_claim(image_report):
     Return an empty string if no claim is available.
     """
 
+    import re
+
     pattern = (
         r"^\s*MAIN CLAIM FOR FACT-CHECKING:\s*(.+?)\s*$"
     )
@@ -162,6 +164,15 @@ def extract_main_claim(image_report):
         flags=re.IGNORECASE | re.MULTILINE,
     )
 
+    if not match:
+        return ""
+
+    claim = match.group(1).strip()
+
+    if claim.lower() == "no clear factual claim identified.":
+        return ""
+
+    return claim
     if not match:
         return ""
 
