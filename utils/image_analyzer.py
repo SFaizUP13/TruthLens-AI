@@ -1,4 +1,6 @@
 import base64
+import re
+
 import streamlit as st
 from openai import OpenAI
 
@@ -8,25 +10,20 @@ VISION_MODEL = "qwen/qwen3.8-27b"
 
 def analyze_image(image_file, related_claim=""):
     """
-    Analyze an uploaded image using Groq's vision model.
-
-    This describes and assesses visible evidence.
-    It does not prove whether an image is authentic.
+    Analyze an image and identify a factual claim
+    that can be passed to the fact-checking pipeline.
     """
 
-    # Read the uploaded image
     image_bytes = image_file.getvalue()
 
     if not image_bytes:
         raise ValueError("The uploaded image is empty.")
 
-    # Prevent unnecessarily large API requests
     if len(image_bytes) > 10 * 1024 * 1024:
         raise ValueError(
             "Please upload an image smaller than 10 MB."
         )
 
-    # Accept only supported image formats
     image_type = image_file.type
 
     allowed_types = [
@@ -40,7 +37,6 @@ def analyze_image(image_file, related_claim=""):
             "Please upload a JPG, PNG, or WebP image."
         )
 
-    # Convert the image into a format accepted by the API
     encoded_image = base64.b64encode(
         image_bytes
     ).decode("utf-8")
@@ -49,67 +45,74 @@ def analyze_image(image_file, related_claim=""):
         f"data:{image_type};base64,{encoded_image}"
     )
 
-    # Create the Groq client using your existing secret
     client = OpenAI(
         api_key=st.secrets["GROQ_API_KEY"],
         base_url="https://api.groq.com/openai/v1",
     )
 
-    # Give the model a focused media-verification task
     prompt = """
     You are the Image Analysis component of TruthLens AI.
 
-    Analyze the supplied image carefully and produce a
-    concise, evidence-based report with these sections:
+    Analyze the supplied image and produce a concise report.
 
     1. VISIBLE CONTENT
-       Describe the people, objects, scene, and other
-       details that are actually visible.
+    Describe the image and its visible elements.
 
     2. VISIBLE TEXT
-       Transcribe important readable text, if any.
-       Clearly identify text that is unclear.
+    Transcribe important readable text.
+    Mark unclear text as uncertain.
 
     3. CONTEXT AND CLAIM
-       Explain what the image appears to show and whether
-       the image itself provides evidence relevant to
-       the user's claim.
+    Explain the central message and factual claims
+    presented by the image.
 
     4. POSSIBLE WARNING SIGNS
-       Mention visible inconsistencies or suspicious
-       details only when you can identify specific
-       observations. Do not treat unusual appearance
-       alone as proof of manipulation.
+    Identify specific observable inconsistencies,
+    missing context, or other relevant warning signs.
+    Do not treat these observations as proof of fraud.
 
     5. LIMITATIONS
-       State what cannot be established from the image.
-       Do not claim that the image is AI-generated,
-       edited, authentic, or fake without reliable evidence.
+    Explain what cannot be established from the image.
+    Do not claim the image is fake or AI-generated
+    without reliable evidence.
 
     6. PRELIMINARY ASSESSMENT
-       Use one of these labels:
-       - Relevant visual evidence found
-       - Possible warning signs observed
-       - Insufficient visual evidence
+    Choose one:
+    - Relevant visual evidence found
+    - Possible warning signs observed
+    - Insufficient visual evidence
+
+    7. MAIN CLAIM FOR FACT-CHECKING
+    Extract ONE concise, independently verifiable
+    factual claim from the image.
+
+    Output the final section using EXACTLY this format,
+    on a single line:
+
+    MAIN CLAIM FOR FACT-CHECKING: [one factual sentence]
+
+    If no clear factual claim can be extracted, write:
+
+    MAIN CLAIM FOR FACT-CHECKING: No clear factual claim identified.
 
     IMPORTANT:
-    - Do not invent details that are not visible.
-    - A photograph alone may not establish when or where
-      it was taken.
-    - Do not identify an unknown person by guessing.
-    - Do not make a definitive authenticity judgment.
-    - Separate observations from assumptions.
+    - Preserve the meaning of the original claim.
+    - Do not turn questions, opinions, or speculation
+      into established facts.
+    - Do not invent names, dates, or locations.
+    - If the claim is ambiguous, say so.
+    - Extracting a claim does not mean it is true.
+    - Do not make a final truth verdict.
     """
 
     if related_claim.strip():
         prompt += (
-            "\n\nUSER'S RELATED CLAIM:\n"
+            "\n\nUSER'S ADDITIONAL CONTEXT:\n"
             + related_claim.strip()
-            + "\n\nAssess whether the visible image supports "
-              "that claim. Do not assume the claim is true."
+            + "\nUse this context to understand the image, "
+              "but do not assume it is true."
         )
 
-    # Send the image and instructions to Groq
     response = client.chat.completions.create(
         model=VISION_MODEL,
         messages=[
@@ -130,7 +133,7 @@ def analyze_image(image_file, related_claim=""):
             }
         ],
         temperature=0.2,
-        max_completion_tokens=900,
+        max_completion_tokens=1000,
     )
 
     result = response.choices[0].message.content
@@ -141,3 +144,30 @@ def analyze_image(image_file, related_claim=""):
         )
 
     return result
+
+
+def extract_main_claim(image_report):
+    """
+    Extract the explicitly labelled claim from the report.
+    Return an empty string if no claim is available.
+    """
+
+    pattern = (
+        r"^\s*MAIN CLAIM FOR FACT-CHECKING:\s*(.+?)\s*$"
+    )
+
+    match = re.search(
+        pattern,
+        image_report,
+        flags=re.IGNORECASE | re.MULTILINE,
+    )
+
+    if not match:
+        return ""
+
+    claim = match.group(1).strip()
+
+    if claim.lower() == "no clear factual claim identified.":
+        return ""
+
+    return claim
