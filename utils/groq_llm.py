@@ -2,8 +2,10 @@ import streamlit as st
 from openai import OpenAI
 from crewai.llms.base_llm import BaseLLM
 
-from utils.source_verifier import check_source_url
-
+from utils.source_verifier import (
+    check_source_url,
+    fetch_source_text,
+)
 
 MODEL = "openai/gpt-oss-20b"
 
