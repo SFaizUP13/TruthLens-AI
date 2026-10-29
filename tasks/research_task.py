@@ -5,115 +5,158 @@ def create_research_task(agent, claim):
 
     return Task(
         description=f"""
-        Investigate the following claim using web research.
+        Investigate the following factual claim
+        using reliable web research.
 
         CLAIM:
         {claim}
 
-        YOUR OBJECTIVE:
-        Find reliable, relevant evidence that helps determine
-        whether this claim is accurate.
+        OBJECTIVE:
+        Find evidence that supports, contradicts,
+        or provides context for this claim.
 
         RESEARCH RULES:
 
-        1. SOURCE QUALITY
-        - Prioritize official government websites and original
-          statements from relevant authorities.
-        - For scientific claims, prioritize original research
-          papers and reputable scientific institutions.
-        - For news claims, prioritize reputable news organizations
-          and independently corroborated reporting.
-        - Prefer primary sources over articles that merely repeat
-          another publication.
+        1. SOURCE PRIORITY
 
-        2. SOURCE TRACEABILITY
-        For every important source, provide:
-        - Exact source title.
-        - Direct URL, when available.
-        - Publisher or issuing organization.
-        - Publication date, if available.
-        - Relevant findings that relate directly to the claim.
+        Prefer:
+        - Official government sources
+        - Original announcements
+        - Scientific publications
+        - Universities and research institutions
+        - Reputable news organizations
+        - Independent fact-checking organizations
 
-        Never invent a source, URL, publication date, quotation,
-        or piece of evidence.
+        Prefer primary sources whenever possible.
 
-        3. EVIDENCE
-        Identify:
-        - Evidence supporting the claim.
-        - Evidence contradicting the claim.
-        - Important facts that remain uncertain.
-        - Whether the evidence is direct or indirect.
+        2. EVIDENCE TRACEABILITY
 
-        Explain how each important finding relates to the claim.
-        Do not treat an unrelated article as proof.
+        For each important source, report:
 
-        4. CURRENT EVENTS
-        For claims involving recent events:
-        - Check dates carefully.
-        - Distinguish the date of an event from the date an article
-          was published.
-        - Prefer recent, authoritative reporting.
-        - Check official statements when relevant.
-        - Clearly state when available evidence is insufficient
-          to confirm whether the event occurred.
+        - Source title
+        - Publisher
+        - Publication date, if available
+        - Direct URL
+        - Relevant evidence
+        - Evidence relationship:
+          SUPPORTS / CONTRADICTS / CONTEXT / UNCLEAR
+        - Evidence access:
+          CONTENT_INSPECTED / SEARCH_RESULT_ONLY / UNKNOWN
 
-        5. MISSING OR CONFLICTING EVIDENCE
-        If reliable sources do not establish whether the claim is
-        true or false, say so explicitly.
+        Use CONTENT_INSPECTED only when the actual
+        source content was available to you.
 
-        Absence of evidence is not automatically evidence that
-        the claim is false.
+        Use SEARCH_RESULT_ONLY when your information
+        comes only from a search result or snippet.
 
-        If sources disagree, explain the disagreement and identify
-        which sources provide the strongest evidence.
+        Use UNKNOWN when the available information
+        does not establish what was inspected.
 
-        6. STRICT LIMITATIONS
-        - Do not issue a TRUE or FALSE verdict.
-        - Do not make a final credibility judgment.
-        - Do not claim that you verified a source if you did not.
-        - Do not present search snippets as conclusive proof.
-        - Do not invent citations to make the report appear complete.
+        Do not invent evidence, URLs, dates,
+        publishers, or source titles.
 
-        REQUIRED OUTPUT FORMAT:
+        3. SOURCE PASSAGES
 
-        A. Claim Under Investigation
-        Restate the claim briefly.
+        When actual source content is available,
+        provide one short, relevant quotation
+        or an accurately paraphrased passage.
 
-        B. Key Findings
+        Clearly label quotations and paraphrases.
+
+        Never fabricate quotations.
+
+        If the relevant passage is unavailable,
+        write:
+
+        Relevant passage: NOT VERIFIED
+
+        4. EVIDENCE RELATIONSHIP
+
+        For every source, explain whether it:
+
+        - Supports the claim
+        - Contradicts the claim
+        - Provides context only
+        - Is inconclusive
+
+        Do not classify a source as supporting
+        or contradicting a claim merely because
+        its title appears relevant.
+
+        5. DATE VERIFICATION
+
+        For recent events:
+        - Check publication dates.
+        - Distinguish event dates from publication dates.
+        - Identify outdated evidence.
+        - Prefer recent official information.
+
+        6. UNCERTAINTY
+
+        Absence of evidence does not automatically
+        establish that a claim is false.
+
+        If evidence is missing or conflicting,
+        clearly explain the limitations.
+
+        7. STRICT RULES
+
+        - Do not issue a final TRUE/FALSE verdict.
+        - Do not invent source quotations.
+        - Do not claim to have opened a source
+          unless its content was actually available.
+        - Do not confuse URL accessibility
+          with evidence verification.
+        - Do not treat search snippets
+          as conclusive proof.
+
+        REQUIRED OUTPUT:
+
+        A. CLAIM
+        Restate the claim.
+
+        B. KEY FINDINGS
         Summarize the most relevant findings.
 
-        C. Supporting Evidence
-        List evidence supporting the claim, if found.
+        C. SOURCE EVIDENCE
+        For each important source provide:
 
-        D. Contradicting Evidence
-        List evidence contradicting the claim, if found.
+        Source:
+        Publisher:
+        Date:
+        URL:
+        Relevant passage:
+        Evidence relationship:
+        Evidence access:
+        Explanation:
 
-        E. Sources
-        For each source, provide its title, publisher, direct URL,
-        publication date if available, and relevant evidence.
+        D. MISSING OR CONFLICTING EVIDENCE
+        Identify unresolved questions.
 
-        F. Uncertainties and Limitations
-        Explain missing evidence, conflicting information,
-        search limitations, or unresolved questions.
+        E. RESEARCH SUMMARY
+        Summarize what the evidence establishes
+        without issuing a final verdict.
 
-        G. Research Summary
-        Briefly summarize what the available evidence establishes
-        and what still requires verification.
+        Keep the report concise.
 
-        Keep the report factual, concise, and easy for the
-        Evidence Analyst to evaluate.
+        Prioritize up to three highly relevant
+        sources rather than many weak sources.
         """,
 
         expected_output="""
-        A structured research report containing:
-        1. Key findings about the claim.
-        2. Supporting and contradicting evidence.
-        3. Source titles, publishers, URLs, and dates when available.
-        4. An explanation of the relevance of each important source.
-        5. Uncertainties and limitations.
-        6. A neutral research summary without a TRUE or FALSE verdict.
+        A concise, evidence-based research report.
 
-        Sources and details must not be fabricated.
+        Include:
+        - Key findings
+        - Up to three relevant sources
+        - Source URLs and dates when available
+        - Relevant passages or NOT VERIFIED
+        - Evidence relationship classifications
+        - Evidence access classifications
+        - Important uncertainties
+
+        Do not fabricate evidence.
+        Do not issue a final verdict.
         """,
 
         agent=agent
