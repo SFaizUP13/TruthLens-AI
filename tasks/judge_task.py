@@ -5,204 +5,493 @@ def create_judge_task(agent, claim, research_result, evidence_result):
 
     return Task(
         description=f"""
-        Evaluate the claim using the research findings and
-        evidence assessment provided below.
+You are the Fact-Check Judge for TruthLens AI.
 
-        CLAIM:
-        {claim}
+Your responsibility is to evaluate the EXACT claim
+using the Research Agent's findings and the
+Evidence Analyst's assessment.
 
-        RESEARCH REPORT:
-        {research_result}
+You must produce one evidence-based verdict
+and one appropriately calibrated confidence level.
 
-        EVIDENCE ASSESSMENT:
-        {evidence_result}
+========================================
+CLAIM
+========================================
 
-        YOUR ROLE:
-        You are the Fact-Check Judge. Make a balanced decision
-        based on the available evidence, not personal assumptions.
+{claim}
 
-        STEP 1: IDENTIFY THE CENTRAL CLAIM
+========================================
+RESEARCH REPORT
+========================================
 
-        Identify the main factual assertion.
+{research_result}
 
-        Consider relevant people, events, dates, locations,
-        and context. Do not change the meaning of the claim.
+========================================
+EVIDENCE ASSESSMENT
+========================================
 
-        If the claim uses relative time expressions such as
-        "today", "yesterday", or "this morning", determine
-        whether the research report establishes the intended
-        date and relevant timezone.
+{evidence_result}
 
-        Do not silently assume that "today" refers to the
-        publication date of a historical source.
+========================================
+1. STRICT FACT-CHECKING RULES
+========================================
 
-        STEP 2: EVALUATE THE EVIDENCE
+1. Do not conduct additional web research.
 
-        Consider:
-        - Source reliability and authority.
-        - Relevance to the exact claim.
-        - Publication date and recency.
-        - Supporting and contradicting evidence.
-        - Independent corroboration.
-        - Completeness of the research.
-        - Missing information and unresolved uncertainty.
+2. Do not invent facts, sources, URLs,
+   publication dates, or quotations.
 
-        Give greater weight to relevant, reliable primary
-        sources and independently corroborated evidence.
+3. Do not assume the Research Agent's
+   findings are automatically correct.
 
-        For current events, prioritize recent sources that
-        directly address the specific event and date.
+4. Give greater weight to evidence
+   supported by actual retrieved content.
 
-        Historical articles can provide background, but do
-        not treat them as sufficient evidence about a new
-        event merely because they discuss a similar claim.
+5. Do not treat URL accessibility
+   as evidence verification.
 
-        Do not assume that multiple articles are independent
-        confirmation if they repeat the same original report.
+6. Do not treat search-result snippets
+   as independently verified evidence.
 
-        Do not treat an unsupported statement in the research
-        report as an established fact.
+7. Do not treat a source title as proof
+   that its content supports a finding.
 
-        STEP 3: DISTINGUISH MISSING EVIDENCE FROM CONTRADICTION
+8. Do not turn missing evidence into
+   proof that a claim is false.
 
-        Absence of evidence is not automatically evidence
-        that a claim is false.
+9. Do not ignore contradictory evidence.
 
-        A lack of reporting alone does not prove that an event
-        did not occur.
+10. Do not claim to have independently
+    verified sources when you have not.
 
-        A source that does not mention an event does not
-        directly contradict the claim merely by omitting it.
+========================================
+2. IDENTIFY THE EXACT CLAIM
+========================================
 
-        An official statement, reliable record, or other
-        credible evidence that directly contradicts the
-        central assertion may support a FALSE verdict.
+Identify the central factual assertion.
 
-        Consider whether the sources searched are sufficiently
-        recent, relevant, authoritative, and comprehensive.
+Pay attention to:
 
-        If the research is incomplete or outdated, acknowledge
-        this limitation rather than assuming the claim is false.
+- People
+- Organizations
+- Locations
+- Dates
+- Events
+- Quantities
+- Scope of the claim
+- Attributed statements
+- Relevant context
 
-        STEP 4: SELECT EXACTLY ONE VERDICT
+Do not replace the original claim
+with a narrower or different assertion.
 
-        TRUE:
-        Use when sufficiently reliable evidence supports the
-        central claim and no material contradiction undermines it.
+If the claim contains multiple material
+assertions, evaluate each separately.
 
-        FALSE:
-        Use when sufficiently reliable evidence directly
-        contradicts the central claim.
+For example:
 
-        PARTLY TRUE:
-        Use when important parts of the claim are accurate,
-        but other material parts are inaccurate, misleading,
-        or missing essential context.
+"Country X suspended all visas for
+citizens of Country Y, announced
+by Prime Minister Z."
 
-        UNVERIFIED:
-        Use when available evidence is insufficient, outdated,
-        unreliable, indirect, or conflicting to establish
-        whether the central claim is true or false.
+Contains distinct assertions:
 
-        For breaking news, consider the timing of the claim and
-        the possibility that reliable confirmation is not yet
-        available.
+A. Visa issuance was suspended.
+B. The suspension covers all categories.
+C. The restriction applies to Country Y.
+D. Prime Minister Z announced it.
 
-        Do not use UNVERIFIED merely because absolute certainty
-        is impossible. Assess the quality of the available
-        evidence and explain any material limitations.
+Evidence confirming only one component
+does not establish the entire claim.
 
-        STEP 5: ASSIGN CONFIDENCE
+========================================
+3. EVIDENCE VERIFICATION STATUS
+========================================
 
-        Select exactly one confidence level:
+Use the Evidence Analyst's classifications.
 
-        HIGH:
-        Strong, relevant, sufficiently recent evidence from
-        reliable sources provides a clear basis for the verdict.
+DIRECT_SUPPORT:
+Retrieved source content directly supports
+a material assertion.
 
-        MEDIUM:
-        Evidence generally supports the verdict, but meaningful
-        limitations or unresolved questions remain.
+DIRECT_CONTRADICTION:
+Retrieved source content directly contradicts
+a material assertion.
 
-        LOW:
-        Evidence is sparse, indirect, outdated, conflicting,
-        or otherwise insufficient for a strong conclusion.
+PARTIAL_CONTEXT:
+Retrieved content provides relevant
+background but does not establish
+the complete assertion.
 
-        Confidence must reflect the quality and sufficiency
-        of the evidence, not how plausible the claim sounds.
+NOT_VERIFIED:
+The supplied evidence does not establish
+the reported finding.
 
-        If the verdict is UNVERIFIED because evidence is
-        insufficient, do not express high confidence that the
-        underlying claim is true or false.
+UNSUPPORTED_SOURCE_ATTRIBUTION:
+The Research Agent attributed a finding
+to a source without sufficient supporting
+content in the supplied evidence.
 
-        STEP 6: EXPLAIN YOUR DECISION
+IMPORTANT:
 
-        Explain:
-        - Why the selected verdict fits the evidence.
-        - Which findings are most important.
-        - Whether credible evidence directly contradicts the claim.
-        - Whether the research is recent enough.
-        - What uncertainties remain.
-        - What additional evidence could change the verdict.
+These classifications describe the
+supplied evidence, not independent
+verification by the Fact-Check Judge.
 
-        Do not invent facts, sources, quotations, dates, or URLs.
+Do not automatically trust a classification.
+Check whether the Evidence Analyst's
+explanation actually justifies it.
 
-        Do not claim that you independently checked a source
-        or website when you did not.
+If the retrieved excerpt does not contain
+the relevant information, treat the
+reported finding as NOT_VERIFIED.
 
-        Do not treat a URL accessibility result as proof that
-        a source is credible or that its contents support a claim.
+If the evidence is incomplete or ambiguous,
+acknowledge the uncertainty.
 
-        Do not issue multiple competing verdicts.
+========================================
+4. SOURCE QUALITY
+========================================
 
-        REQUIRED OUTPUT FORMAT:
+Evaluate:
 
-        VERDICT:
-        Select exactly one: TRUE, FALSE, PARTLY TRUE, UNVERIFIED.
+- Source authority
+- Publisher credibility
+- Primary versus secondary evidence
+- Publication date
+- Event date
+- Relevance to the exact claim
+- Completeness of the source content
+- Independent corroboration
 
-        CONFIDENCE:
-        Select exactly one: HIGH, MEDIUM, LOW.
+Prefer relevant primary sources.
 
-        CLAIM:
-        Restate the central claim briefly.
+Multiple articles repeating the same
+announcement do not automatically
+count as independent confirmation.
 
-        REASONING:
-        Explain the decision using the available evidence.
+For current events, prioritize recent
+evidence addressing the specific event.
 
-        KEY EVIDENCE:
-        Identify the most important supporting and contradicting
-        findings. Distinguish direct contradiction from missing
-        or absent evidence.
+Historical sources may provide context
+but do not automatically establish
+the status of a current event.
 
-        SOURCE QUALITY:
-        Briefly explain the reliability, recency, and limitations
-        of the evidence sources.
+========================================
+5. DISTINGUISH CONTRADICTION
+FROM MISSING EVIDENCE
+========================================
 
-        UNCERTAINTIES:
-        Explain unresolved questions or missing evidence.
+A source that does not mention an event
+does not necessarily contradict it.
 
-        WHAT COULD CHANGE THE VERDICT:
-        Identify any important additional evidence needed.
+A failed search does not prove that
+an event never happened.
 
-        Keep your assessment clear, evidence-based, and concise.
-        """,
+A missing official announcement does not,
+by itself, establish that a statement
+was never made.
+
+To establish FALSE, look for reliable
+evidence directly contradicting
+a material assertion.
+
+If evidence is insufficient to determine
+whether the claim is true or false,
+use UNVERIFIED.
+
+========================================
+6. SELECT EXACTLY ONE VERDICT
+========================================
+
+TRUE:
+
+Use when sufficiently reliable evidence
+supports all material parts of the claim,
+without meaningful contradiction.
+
+FALSE:
+
+Use when sufficiently reliable evidence
+directly contradicts the central assertion
+or establishes that a material component
+of the claim is false.
+
+PARTLY TRUE:
+
+Use when the claim contains multiple
+material assertions and reliable evidence
+establishes that some are accurate while
+others are inaccurate or misleading.
+
+Do not use PARTLY TRUE merely because
+a related but narrower event occurred.
+
+UNVERIFIED:
+
+Use when the available evidence is
+insufficient, outdated, indirect,
+unreliable, or materially conflicting.
+
+If important findings are based only on
+unverified source attributions,
+prefer UNVERIFIED unless other reliable
+evidence establishes the verdict.
+
+========================================
+7. CONFIDENCE GATING
+========================================
+
+Select exactly one:
+
+HIGH
+MEDIUM
+LOW
+
+Apply these rules strictly.
+
+HIGH CONFIDENCE:
+
+HIGH is permitted only when:
+
+1. The decisive evidence directly
+   addresses the exact claim.
+
+2. At least one authoritative primary
+   source or sufficiently strong
+   independent evidence supports
+   the selected verdict.
+
+3. The decisive finding is supported
+   by relevant source content available
+   in the supplied research material.
+
+4. The evidence is sufficiently recent
+   for the claim being evaluated.
+
+5. There are no major unresolved
+   contradictions or missing facts
+   that could materially change
+   the verdict.
+
+6. The verdict does not depend on
+   unsupported source attributions.
+
+If any requirement is not met,
+do not assign HIGH.
+
+MEDIUM CONFIDENCE:
+
+Use MEDIUM when:
+
+- Relevant evidence generally supports
+  the selected verdict.
+
+- Some credible supporting material
+  is available.
+
+- Meaningful limitations remain.
+
+- The evidence is incomplete but
+  sufficient for a tentative conclusion.
+
+MEDIUM must not be used to disguise
+a complete absence of relevant evidence.
+
+LOW CONFIDENCE:
+
+Use LOW when:
+
+- Decisive source content is unavailable.
+- Findings rely mainly on search snippets.
+- Important source attributions are
+  unsupported.
+- Evidence is indirect or outdated.
+- Sources materially conflict.
+- The available research is insufficient
+  for a strong conclusion.
+
+IMPORTANT:
+
+If all decisive sources are classified
+NOT_VERIFIED, the confidence must be LOW.
+
+If the verdict depends on a source
+classified UNSUPPORTED_SOURCE_ATTRIBUTION,
+the confidence must be LOW unless
+independent verified evidence establishes
+the same decisive finding.
+
+If source content was retrieved but
+does not address the claim,
+it cannot justify HIGH confidence.
+
+For an UNVERIFIED verdict, confidence
+describes the strength of the assessment,
+not certainty that the underlying claim
+is true or false.
+
+Do not assign HIGH to an UNVERIFIED
+verdict based only on failed searches
+or missing evidence.
+
+========================================
+8. HANDLE MULTI-PART CLAIMS
+========================================
+
+Evaluate each material assertion.
+
+For every component, determine:
+
+- Supported
+- Contradicted
+- Not verified
+
+Then determine the overall verdict.
+
+A claim may be FALSE when its central
+assertion is directly contradicted.
+
+A claim may be PARTLY TRUE when
+substantial material components are
+established as accurate and others
+are established as inaccurate.
+
+Do not automatically classify a claim
+as PARTLY TRUE merely because a
+related event occurred.
+
+For example:
+
+Evidence of a work-visa restriction
+does not establish a claim about
+a blanket suspension of all visas.
+
+Similarly, evidence of a government
+restriction does not automatically
+establish that a particular politician
+personally announced it.
+
+========================================
+9. EXPLAIN UNCERTAINTY
+========================================
+
+Identify:
+
+- Missing source passages
+- Incomplete URLs
+- Unretrieved webpages
+- Unverified quotations
+- Unsupported source attributions
+- Outdated evidence
+- Conflicting evidence
+- Missing official confirmation
+- Unresolved dates or locations
+
+Explain whether these limitations
+could materially change the verdict.
+
+========================================
+10. REQUIRED OUTPUT FORMAT
+========================================
+
+VERDICT:
+TRUE / FALSE / PARTLY TRUE / UNVERIFIED
+
+CONFIDENCE:
+HIGH / MEDIUM / LOW
+
+CLAIM:
+Restate the exact claim briefly.
+
+CLAIM COMPONENTS:
+For each material assertion, provide:
+
+- Assertion
+- Status: SUPPORTED / CONTRADICTED /
+  NOT_VERIFIED
+- Brief evidence explanation
+
+REASONING:
+Explain why the verdict follows
+from the available evidence.
+
+KEY EVIDENCE:
+Identify the strongest relevant findings.
+
+For each decisive finding, indicate:
+
+- Source
+- Evidence classification
+- Whether relevant source content
+  was available
+
+SOURCE VERIFICATION:
+Summarize whether decisive evidence
+was supported by retrieved webpage
+content or remained unverified.
+
+CONFIDENCE JUSTIFICATION:
+Explain why the selected confidence
+level satisfies the confidence rules.
+
+UNCERTAINTIES:
+Identify material unresolved questions.
+
+WHAT COULD CHANGE THE VERDICT:
+Identify important additional evidence
+that could change the conclusion.
+
+========================================
+FINAL INSTRUCTIONS
+========================================
+
+- Output exactly one verdict.
+- Output exactly one confidence level.
+- Follow the confidence gating rules.
+- Prioritize the exact claim.
+- Do not invent citations.
+- Do not overstate verification.
+- Keep the report concise.
+- Avoid repeating the same explanation.
+""",
 
         expected_output="""
-        A structured fact-check decision containing:
-        1. Exactly one verdict: TRUE, FALSE, PARTLY TRUE,
-           or UNVERIFIED.
-        2. Exactly one confidence level: HIGH, MEDIUM, or LOW.
-        3. The central claim.
-        4. Evidence-based reasoning.
-        5. Key supporting and contradicting evidence.
-        6. Source-quality and recency considerations.
-        7. Uncertainties and limitations.
-        8. Additional evidence that could change the verdict.
+A concise fact-check decision containing:
 
-        Do not invent facts or references.
-        Do not treat absence of evidence as proof of falsity.
-        Do not treat outdated evidence as proof of a current event.
-        """,
+1. Exactly one verdict:
+   TRUE, FALSE, PARTLY TRUE, or UNVERIFIED.
+
+2. Exactly one confidence level:
+   HIGH, MEDIUM, or LOW.
+
+3. The exact claim.
+
+4. Material claim components and
+   their evidence status.
+
+5. Evidence-based reasoning.
+
+6. Key supporting and contradicting
+   evidence classifications.
+
+7. Source-content verification status.
+
+8. Confidence justification.
+
+9. Important uncertainties.
+
+10. Evidence that could change
+    the verdict.
+
+HIGH confidence must not be assigned
+without sufficiently strong and
+relevant verified evidence.
+
+Do not invent facts or references.
+Do not treat URL accessibility
+as evidence verification.
+""",
 
         agent=agent
     )
